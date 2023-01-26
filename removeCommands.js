@@ -18,19 +18,17 @@ const token = process.env.TOKEN;
 client.once("ready", () => {
     client.application.commands.fetch()
     .then(commands => {
-        commands.forEach(async command => {
-            await Promise.all(commands.map(async command => await client.application.commands.delete(command.id)));
-
-            console.log("Client commands deleted");
+        commands.forEach(command => {
+            client.application.commands.delete(command.id);
         })
     });
 
     client.guilds.cache.forEach(guild => {
         guild.commands.fetch()
-        .then(async commands => {
-            await Promise.all(commands.map(async command => await guild.commands.delete(command.id)));
-
-            console.log("Guild commands deleted");
+        .then(commands => {
+            commands.forEach(command => {
+                guild.commands.delete(command.id);
+            });
         });
     })
 }); // bot startup
