@@ -3,7 +3,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 export default {
     data: new SlashCommandBuilder()
         .setName("createcharacter")
-        .setDescription("Create a new character")
+        .setDescription("Create a new character with a pfp based on yours")
         .addStringOption(option => option
             .setName("name")
             .setDescription("The name of the character")
