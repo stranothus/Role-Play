@@ -10,7 +10,7 @@ export default {
             .setDescription("The Dungeon Master of this channel")
             .setRequired(true)
         )
-        .addStringOption(option => option
+        .addUserOption(option => option
             .setName("campaignname")
             .setDescription("The campaign's name")
             .setRequired(true)
