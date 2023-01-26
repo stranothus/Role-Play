@@ -11,17 +11,30 @@ export default {
             .setRequired(true)
         ),
     execute: async function(interaction) {
-        const userID = interaction.member.id;
-        const channel = (await global.DB.db("Info").collection("Guilds").findOne({ guildID: interaction.guild.id, "channels.channelID": interaction.channel.id })).channels.filter(v => v.channelID == interaction.channel.id)?.[0];
+        let userID = interaction.member.id;
+        let character = await global.DB.db("Info").collection("Guilds").findOne({ id: interaction.guild.id, "characters.userID": userID });
 
-        if(!channel) return interaction.reply({ content: "This channel has not been set up for roleplay", ephemeral: true });
-        if(channel.dungeonmaster === userID) return interaction.reply({ content: `This command is intended for players. Try /npcroleplay`, ephemeral: true });
+        if(!character) {
+            interaction.reply({ content: "You have not created a character yet", ephemeral: true });
+            return;
+        }
+        
+        let channel = (await global.DB.db("Info").collection("Guilds").findOne({ id: interaction.guild.id, "channels.channelID": interaction.channel.id })).channels.filter(v => v.channelID == interaction.channel.id)[0];
 
-        const character = channel.characters.filter(v => v.userID === userID)?.[0];
+        if(!channel) {
+            interaction.reply({ content: "This channel has not been set up for roleplay", ephemeral: true });
+            return;
+        } else if(channel.last === userID) {
+            interaction.reply({ content: "You just posted", ephemeral: true });
+            return;
+        } else if(channel.type === 2) {
+            interaction.reply({ content: "This is a narrator only channel", ephemeral: true });
+            return;
+        }
 
-        if(!character) return interaction.reply({ content: `You have not created a character for this channel yet`, ephemeral: true });
-
-        asUser(interaction.channel, character, { content: interaction.options.getString("content") });
+        asUser(interaction.channel, character.characters.filter(v => v.userID == userID)[0], { content: interaction.options.getString("content") });
         interaction.reply({ content: "Message sent", ephemeral: true });
+
+        global.DB.db("Info").collection("Guilds").updateOne({ id: interaction.guild.id, "channels.channelID": interaction.channel.id }, { $set: { "channels.$.last": userID }});
     }
 }

@@ -37,11 +37,27 @@ export default {
                 } catch (error) {
                     console.error(error);
                 }
-                
+
+                let setup = (await client.guilds.cache.get(guild.id).commands.fetch()).find(v => v.name === "setup");
+
+                guild.commands.permissions.set({
+                    command: setup.id,
+                    permissions: guild.members.cache.map(member => member.permissions.has(Permissions.FLAGS.ADMINISTRATOR) ? {
+                        id: member.user.id,
+                        type: "USER",
+                        permission: true
+                    } : {
+                        id: member.user.id,
+                        type: "USER",
+                        permission: false
+                    })
+                });
+        
                 // create a DB document for new servers
-                if(!(await global.DB.db("Info").collection("Guilds").findOne({ guildID: guild.id }))) {
+                if(!(await global.DB.db("Info").collection("Guilds").findOne({ id: guild.id }))) {
                     global.DB.db("Info").collection("Guilds").insertOne({
-                        guildID: guild.id,
+                        id: guild.id,
+                        characters: [],
                         channels: []
                     });
                 }
