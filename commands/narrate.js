@@ -13,12 +13,10 @@ export default {
         ),
     execute: async function(interaction) {
         const userID = interaction.member.id;
-        const channel = interaction.channel.id;
-        const guild = await global.DB.db("Info").collection("Guilds").findOne({ guildID: interaction.guild.id });
-        const channelDB = guild.channels.filter(v => v.channelID === channel)?.[0];
+        const channel = (await global.DB.db("Info").collection("Guilds").findOne({ guildID: interaction.guild.id, "channels.channelID": interaction.channel.id })).channels.filter(v => v.channelID == interaction.channel.id)?.[0];
 
-        if(!channelDB) return interaction.reply({ content: "This channel has not been set up for roleplay", ephemeral: true });
-        if(channelDB.dungeonmaster !== userID) return interaction.reply({ content: `This command is only accessible to the Dungeon Master`, ephemeral: true });
+        if(!channel) return interaction.reply({ content: "This channel has not been set up for roleplay", ephemeral: true });
+        if(channel.dungeonmaster !== userID) return interaction.reply({ content: `This command is only accessible to the Dungeon Master`, ephemeral: true });
 
         asUser(interaction.channel, {
             name: "Narrator",
@@ -26,10 +24,10 @@ export default {
         }, { 
             embeds: [
                 new MessageEmbed()
-                    .setTitle(`${channelDB.campaignname} Narration`)
+                    .setTitle(`${channel.campaignname} Narration`)
                     .setAuthor({ name: `Dungeon Master: ${interaction.member.displayName}`, iconURL: interaction.member.displayAvatarURL() })
                     .setDescription(interaction.options.getString("content"))
-                    .setThumbnail(channelDB.campaignimage)
+                    .setThumbnail(channel.campaignimage)
                     .setTimestamp()
                     .setFooter({ text: "Powered by DnD Role Play bot", iconURL: interaction.client.user.avatarURL() })
             ]
